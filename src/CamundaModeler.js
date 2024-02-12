@@ -1,17 +1,22 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
-import BpmnModdle from 'bpmn-moddle';
-import xml2js from 'xml-js';
+import { JParser } from './JParser';
+import { downloadXML, downloadJSON } from './Downloader';
+import { jsonToXml, xmlToJson } from './xml2json'
 
 import './CamundaModeler.css'
 
 const CamundaModeler = () => {
     const bpmnModelerRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const [isOpen, setOpen] = useState(false);
+    const [errorOccured, setErrorOccured] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
         bpmnModelerRef.current = new BpmnModeler({
@@ -32,57 +37,75 @@ const CamundaModeler = () => {
                 console.log('BPMN diagram created successfully');
             }
         });
+        setOpen(true);
     };
 
     const handleSaveDiagram = async () => {
         const bpmnModeler = bpmnModelerRef.current;
         try {
             const { xml } = await bpmnModeler.saveXML({ format: true }, function (err, xml) {
-                //here xml is the bpmn format 
             });
-            const json = xml2js.xml2json(xml, { compact: true, spaces: 2 });
+            const json = xmlToJson(xml);
             downloadJSON(json);
+            downloadXML(xml);
         } catch (error) {
             console.error('Error converting BPMN diagram to JSON', error);
         }
     };
 
-    const downloadXML = (xml) => {
-        const blob = new Blob([xml], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'diagram.bpmn';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    const loadDiagram = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const parser = new JParser(e.target.result);
+            const bpmnJSON = parser.parse();
+            const bpmnXML = jsonToXml(bpmnJSON);
+            // throw Error(bpmnXML);
+            try {
+                const modeler = bpmnModelerRef.current;
+                modeler.importXML(bpmnXML);
+                setOpen(true);
+            } catch (error) {
+                setErrorOccured(true);
+                setErrorMsg(error.message);
+            }
+        };
+
+        reader.readAsText(file);
     };
 
-    const downloadJSON = (json) => {
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'diagram.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const handleLoadDiagram = () => {
-        // Handle loading a BPMN diagram
+    const handleLoadDiagram = async () => {
+        fileInputRef.current.click();
     };
 
     return (
         <div className='editor-container'>
-            <div className="button-container">
-                <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
-                <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
-                <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
-            </div>
-            <div id="bpmnview" className='editor'></div>
+            {errorOccured ? (
+                <div className='error-message'>
+                    {errorMsg}
+                </div>
+            ) : (
+                !isOpen ? (
+                    <div className='intro-text'>
+                        <div>
+                            <button className="create-link" onClick={handleCreateDiagram}>Create a new diagram </button>
+                            {' '}or{' '}
+                            <label htmlFor="file-input" className="load-link">
+                                <span>Load an existing one</span>
+                            </label>
+                            {' '}to get started.
+                        </div>
+                    </div>
+                ) : (
+                    <div className="button-container">
+                        <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
+                        <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
+                        <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
+                    </div>)
+            )
+            }
+            <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>
+            <input ref={fileInputRef} id="file-input" type="file" accept='application/json' style={{ display: 'none' }} onChange={loadDiagram} />
         </div>
     );
 };

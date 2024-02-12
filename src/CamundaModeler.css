@@ -13,8 +13,24 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* For buttons */
+.editor.open {
+    visibility: visible;
+}
 
+.editor.closed {
+    visibility: hidden;
+}
+
+.intro-text {
+    position: relative;
+    top: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: larger;
+}
+
+/* For buttons */
 .button-container {
     position: absolute;
     top: 10px;
@@ -34,4 +50,20 @@
 
 .action-button:hover {
     background-color: #0056b3;
+}
+
+/* For links */
+.create-link,
+.load-link {
+    border: none;
+    background: none;
+    color: blue;
+    padding: 0;
+    font: inherit;
+}
+
+.create-link:hover,
+.load-link:hover {
+    color: red;
+    cursor: pointer;
 }
