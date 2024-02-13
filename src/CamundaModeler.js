@@ -4,7 +4,10 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
+import 'diagram-js-minimap/assets/diagram-js-minimap.css';
 
+
+import minimapModule from 'diagram-js-minimap';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import {
     BpmnPropertiesPanelModule,
@@ -33,7 +36,8 @@ const CamundaModeler = () => {
             },
             additionalModules: [
                 BpmnPropertiesPanelModule,
-                BpmnPropertiesProviderModule
+                BpmnPropertiesProviderModule,
+                minimapModule
             ]
         });
 
