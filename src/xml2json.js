@@ -1,71 +1,68 @@
 
 export function xmlToJson(xml) {
-    let jsonString = '{'; // Initialize an empty string to store the JSON
+    let jsonString = '{\n';
 
-    // Check if the input is a string, if so, parse it to an XML document
     if (typeof xml === 'string') {
         const parser = new DOMParser();
         xml = parser.parseFromString(xml, 'text/xml');
     }
 
-    // If the input is not an XML document, return an empty string
     if (!(xml instanceof XMLDocument)) {
         return jsonString + '}';
     }
 
-    // Convert XML nodes to JSON recursively
     const parseNode = (node, depth) => {
-        let indent = '  '.repeat(depth); // Indentation for formatting
+        let indent = '  '.repeat(depth);
+        function updateIndent(val) {
+            depth += val;
+            depth = (depth <= 0) ? 0 : depth;
+            indent = '  '.repeat(depth);
+        };
 
-        // If the node is an element, process its child nodes
         if (node.nodeType === Node.ELEMENT_NODE) {
-            jsonString += `\n${indent}"${node.nodeName}": {`;
+            jsonString += `${indent}"${node.nodeName}": {`;
 
-            // Process attributes
             if (node.attributes.length > 0) {
-                jsonString += '"_attributes": {';
+                updateIndent(2);
+                jsonString += `\n${indent}"_attributes": {\n`;
+                updateIndent(2);
                 for (let i = 0; i < node.attributes.length; i++) {
                     const attribute = node.attributes[i];
-                    jsonString += `"${attribute.nodeName}": "${attribute.nodeValue}"`;
-                    if (i < node.attributes.length - 1 || node.childNodes.length > 0) {
-                        jsonString += ', ';
+                    jsonString += `${indent}"${attribute.nodeName}": "${attribute.nodeValue}"`;
+                    if (i < node.attributes.length - 1) {
+                        jsonString += ',\n';
                     }
                 }
-                jsonString += '}';
+                updateIndent(-2);
+                jsonString += `\n${indent}}`;
+                updateIndent(-2);
             }
 
-            // Process child nodes
             if (node.childNodes.length > 0) {
                 if (node.attributes.length > 0) {
-                    jsonString += ', '; // Add comma if there are both attributes and child nodes
+                    jsonString += ',\n';
                 }
                 for (let i = 0; i < node.childNodes.length; i++) {
                     const childNode = node.childNodes[i];
-                    parseNode(childNode, depth + 1); // Recursively process child nodes
+                    parseNode(childNode, depth + 2);
                     if (i < node.childNodes.length - 1) {
-                        jsonString += ', '; // Add comma if there are more child nodes
+                        jsonString += ',\n';
                     }
                 }
             }
 
-            jsonString += '}';
+            jsonString += `\n${indent}}`;
         }
-
-        // If the node is a text node, append its value
         else if (node.nodeType === Node.TEXT_NODE) {
-            const textValue = node.nodeValue.trim(); // Remove leading/trailing whitespace
+            const textValue = node.nodeValue.trim();
             if (textValue) {
-                jsonString += `"#text": "${textValue}"`; // Append text value if not empty
+                jsonString += `"#text": "${textValue}"`;
             }
         }
     };
-
-    // Start parsing from the root element of the XML document
-    parseNode(xml.documentElement, 1);
-
-    jsonString += '}';
-    // Remove trailing comma if exists
-    jsonString = jsonString.replace(/,\s*}/g, '}').replace(/,\s*,/g, ',');
+    parseNode(xml.documentElement, 2);
+    jsonString += '\n}';
+    jsonString = jsonString.replace(/},\n/g, '}').replace(/,\s*,/g, ',');
 
     return jsonString;
 }
@@ -77,8 +74,8 @@ export function jsonToXml(json) {
 
     function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
-        const indent = '    '.repeat(depth); // Four spaces for each indentation level
-        // If the node is an object, convert it to XML attributes or elements
+        const indent = '    '.repeat(depth);
+
         if (typeof node === 'object') {
             if (Array.isArray(node)) {
                 node.forEach((item, index) => {
@@ -94,7 +91,7 @@ export function jsonToXml(json) {
                     }
                 }
                 xml += `>\n`;
-                // Recursively convert child nodes to XML
+
                 for (const key in node) {
                     if (key === '_attributes') continue;
                     if (key === '#text') {
@@ -110,19 +107,15 @@ export function jsonToXml(json) {
                 xml += `${indent}</${removeUniqueId(nodeName)}>\n`;
             }
         } else {
-            // If the node is a text value, return it as XML text content
             xml += `${indent}<${removeUniqueId(nodeName)}>${node}</${removeUniqueId(nodeName)}>\n`;
         }
         return xml;
     }
 
-
-    // Convert the JSON object to XML format
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 
-    // Convert each property of the JSON object to XML elements
     for (const key in json) {
-        if (key === '_declaration') continue; // Skip the _declaration property
+        if (key === '_declaration') continue;
         xml += convertNodeToXml(json[key], key);
     }
 
