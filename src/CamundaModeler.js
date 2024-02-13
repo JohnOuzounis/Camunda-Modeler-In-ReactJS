@@ -3,16 +3,23 @@ import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+import '@bpmn-io/properties-panel/assets/properties-panel.css';
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
+import {
+    BpmnPropertiesPanelModule,
+    BpmnPropertiesProviderModule
+} from 'bpmn-js-properties-panel';
+
 import { JParser } from './JParser';
-import { downloadXML, downloadJSON } from './Downloader';
+import { downloadJSON } from './Downloader';
 import { jsonToXml, xmlToJson } from './xml2json'
 
 import './CamundaModeler.css'
 
 const CamundaModeler = () => {
     const bpmnModelerRef = useRef(null);
+    const propertiesPanelRef = useRef(null);
     const fileInputRef = useRef(null);
     const [isOpen, setOpen] = useState(false);
     const [errorOccured, setErrorOccured] = useState(false);
@@ -20,19 +27,34 @@ const CamundaModeler = () => {
 
     useEffect(() => {
         bpmnModelerRef.current = new BpmnModeler({
-            container: '#bpmnview'
+            container: '#bpmnview',
+            propertiesPanel: {
+                parent: '#propertiesview'
+            },
+            additionalModules: [
+                BpmnPropertiesPanelModule,
+                BpmnPropertiesProviderModule
+            ]
         });
+
+        propertiesPanelRef.current = bpmnModelerRef.current.get('propertiesPanel');
 
         return () => {
             bpmnModelerRef.current.destroy();
         };
     }, []);
 
+    const handleError = (msg) => {
+        setErrorOccured(true);
+        setErrorMsg(msg);
+        setOpen(false);
+    };
+
     const handleCreateDiagram = () => {
         const bpmnModeler = bpmnModelerRef.current;
         bpmnModeler.createDiagram((err, warnings) => {
             if (err) {
-                console.error('Failed to create BPMN diagram', err);
+                handleError('Failed to create BPMN diagram: ' + err.message);
             } else {
                 console.log('BPMN diagram created successfully');
             }
@@ -47,9 +69,8 @@ const CamundaModeler = () => {
             });
             const json = xmlToJson(xml);
             downloadJSON(json);
-            downloadXML(xml);
         } catch (error) {
-            console.error('Error converting BPMN diagram to JSON', error);
+            handleError('Error converting BPMN diagram to JSON: ' + error.message);
         }
     };
 
@@ -57,17 +78,22 @@ const CamundaModeler = () => {
         const file = event.target.files[0];
         const reader = new FileReader();
         reader.onload = (e) => {
-            const parser = new JParser(e.target.result);
-            const bpmnJSON = parser.parse();
-            const bpmnXML = jsonToXml(bpmnJSON);
-            // throw Error(bpmnXML);
             try {
+                const fileType = file.name.split('.').pop().toLowerCase();
+                let bpmnXML;
+
+                if (fileType === 'bpmn') {
+                    bpmnXML = e.target.result;
+                } else if (fileType === 'json') {
+                    const parser = new JParser(e.target.result);
+                    const bpmnJSON = parser.parse();
+                    bpmnXML = jsonToXml(bpmnJSON);
+                }
                 const modeler = bpmnModelerRef.current;
                 modeler.importXML(bpmnXML);
                 setOpen(true);
             } catch (error) {
-                setErrorOccured(true);
-                setErrorMsg(error.message);
+                handleError('Error occured while loading BPMN diagram: ' + error.message);
             }
         };
 
@@ -82,7 +108,7 @@ const CamundaModeler = () => {
         <div className='editor-container'>
             {errorOccured ? (
                 <div className='error-message'>
-                    {errorMsg}
+                    <p className="error-text">{errorMsg}</p>
                 </div>
             ) : (
                 !isOpen ? (
@@ -105,7 +131,8 @@ const CamundaModeler = () => {
             )
             }
             <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>
-            <input ref={fileInputRef} id="file-input" type="file" accept='application/json' style={{ display: 'none' }} onChange={loadDiagram} />
+            <div id="propertiesview" className={`properties-panel ${isOpen ? 'open' : 'closed'}`}></div>
+            <input ref={fileInputRef} id="file-input" type="file" accept='.bpmn, .json' style={{ display: 'none' }} onChange={loadDiagram} />
         </div>
     );
 };
