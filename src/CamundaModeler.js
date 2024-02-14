@@ -25,8 +25,6 @@ const CamundaModeler = () => {
     const propertiesPanelRef = useRef(null);
     const fileInputRef = useRef(null);
     const [isOpen, setOpen] = useState(false);
-    const [errorOccured, setErrorOccured] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
         bpmnModelerRef.current = new BpmnModeler({
@@ -49,9 +47,8 @@ const CamundaModeler = () => {
     }, []);
 
     const handleError = (msg) => {
-        setErrorOccured(true);
-        setErrorMsg(msg);
         setOpen(false);
+        window.alert(msg);
     };
 
     const handleCreateDiagram = () => {
@@ -110,11 +107,7 @@ const CamundaModeler = () => {
 
     return (
         <div className='editor-container'>
-            {errorOccured ? (
-                <div className='error-message'>
-                    <p className="error-text">{errorMsg}</p>
-                </div>
-            ) : (
+            {
                 !isOpen ? (
                     <div className='intro-text'>
                         <div>
@@ -132,7 +125,6 @@ const CamundaModeler = () => {
                         <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
                         <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
                     </div>)
-            )
             }
             <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>
             <div id="propertiesview" className={`properties-panel ${isOpen ? 'open' : 'closed'}`}></div>

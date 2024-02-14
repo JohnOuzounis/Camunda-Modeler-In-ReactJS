@@ -64,23 +64,6 @@
     background-color: #0056b3;
 }
 
-.error-message {
-    position: relative;
-    top: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.error-text {
-    color: rgba(185, 21, 21, 0.752);
-    font-style: bold;
-    font-size: larger;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
 /* For links */
 .create-link,
 .load-link {
