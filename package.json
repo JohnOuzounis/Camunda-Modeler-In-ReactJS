@@ -16,8 +16,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "stream": "^0.0.2",
-    "web-vitals": "^2.1.4",
-    "xml-js": "^1.6.11"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
