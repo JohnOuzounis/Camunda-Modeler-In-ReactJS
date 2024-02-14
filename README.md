@@ -8,7 +8,6 @@ This is a React web application for creating, editing, and visualizing BPMN diag
 - Load existing BPMN diagrams (both BPMN and JSON formats supported)
 - Save BPMN diagrams as JSON files
 - Visualize and edit BPMN diagrams using the Camunda Modeler
-- Display errors when loading or saving diagrams
 
 ## Installation
 
