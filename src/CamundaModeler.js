@@ -97,8 +97,8 @@ const CamundaModeler = () => {
                 handleError('Error occured while loading BPMN diagram: ' + error.message);
             }
         };
-
-        reader.readAsText(file);
+        if (file)
+            reader.readAsText(file);
     };
 
     const handleLoadDiagram = async () => {
