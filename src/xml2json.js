@@ -62,7 +62,7 @@ export function xmlToJson(xml) {
     };
     parseNode(xml.documentElement, 2);
     jsonString += '\n}';
-    jsonString = jsonString.replace(/},\n/g, '}').replace(/,\s*,/g, ',');
+    jsonString = jsonString.replace(/},\n/g, '}').replace(/,\s*,/g, ',').replace(/{,\n/g, '{\n');
 
     return jsonString;
 }
