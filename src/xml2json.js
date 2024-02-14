@@ -5,6 +5,19 @@ export function xmlToJson(xml) {
     if (typeof xml === 'string') {
         const parser = new DOMParser();
         xml = parser.parseFromString(xml, 'text/xml');
+
+        const filterEmptyTextNodes = (node) => {
+            const childNodes = node.childNodes;
+            for (let i = childNodes.length - 1; i >= 0; i--) {
+                const childNode = childNodes[i];
+                if (childNode.nodeType === Node.TEXT_NODE && !childNode.nodeValue.trim()) {
+                    node.removeChild(childNode);
+                } else if (childNode.nodeType === Node.ELEMENT_NODE) {
+                    filterEmptyTextNodes(childNode);
+                }
+            }
+        }
+        filterEmptyTextNodes(xml);
     }
 
     if (!(xml instanceof XMLDocument)) {
@@ -20,11 +33,11 @@ export function xmlToJson(xml) {
         };
 
         if (node.nodeType === Node.ELEMENT_NODE) {
-            jsonString += `${indent}"${node.nodeName}": {`;
+            jsonString += `${indent}"${node.nodeName}": {\n`;
 
             if (node.attributes.length > 0) {
                 updateIndent(2);
-                jsonString += `\n${indent}"_attributes": {\n`;
+                jsonString += `${indent}"_attributes": {\n`;
                 updateIndent(2);
                 for (let i = 0; i < node.attributes.length; i++) {
                     const attribute = node.attributes[i];
@@ -56,13 +69,12 @@ export function xmlToJson(xml) {
         else if (node.nodeType === Node.TEXT_NODE) {
             const textValue = node.nodeValue.trim();
             if (textValue) {
-                jsonString += `"#text": "${textValue}"`;
+                jsonString += `${indent}"#text": "${textValue}"`;
             }
         }
     };
     parseNode(xml.documentElement, 2);
     jsonString += '\n}';
-    jsonString = jsonString.replace(/},\n/g, '}').replace(/,\s*,/g, ',').replace(/{,\n/g, '{\n');
 
     return jsonString;
 }
