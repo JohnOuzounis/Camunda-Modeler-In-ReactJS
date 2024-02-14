@@ -77,37 +77,23 @@ export function jsonToXml(json) {
         const indent = '    '.repeat(depth);
 
         if (typeof node === 'object') {
-            if (Array.isArray(node)) {
-                node.forEach((item, index) => {
-                    xml += `${indent}<${removeUniqueId(nodeName)} id="${item._attributes.id}">\n`;
-                    xml += convertNodeToXml(item, nodeName, depth + 1);
-                    xml += `${indent}</${removeUniqueId(nodeName)}>\n`;
-                });
-            } else {
-                xml += `${indent}<${removeUniqueId(nodeName)}`;
-                if (node._attributes) {
-                    for (const attrName in node._attributes) {
-                        xml += ` ${attrName}="${node._attributes[attrName]}"`;
-                    }
+            xml += `${indent}<${removeUniqueId(nodeName)}`;
+            if (node._attributes) {
+                for (const attrName in node._attributes) {
+                    xml += ` ${attrName}="${node._attributes[attrName]}"`;
                 }
-                xml += `>\n`;
-
-                for (const key in node) {
-                    if (key === '_attributes') continue;
-                    if (key === '#text') {
-                        if (Array.isArray(node[key])) {
-                            xml += `${node[key].map(text => `${indent}${'    '.repeat(depth + 1)}${text}`).join('\n')}\n`;
-                        } else {
-                            xml += `${indent}${'    '.repeat(depth + 1)}${node[key]}\n`;
-                        }
-                    } else {
-                        xml += convertNodeToXml(node[key], key, depth + 1);
-                    }
-                }
-                xml += `${indent}</${removeUniqueId(nodeName)}>\n`;
             }
-        } else {
-            xml += `${indent}<${removeUniqueId(nodeName)}>${node}</${removeUniqueId(nodeName)}>\n`;
+            xml += `>\n`;
+
+            for (const key in node) {
+                if (key === '_attributes') continue;
+                if (key === '#text') {
+                    xml += `${'    '.repeat(depth + 1)}${node[key]}\n`;
+                } else {
+                    xml += convertNodeToXml(node[key], key, depth + 1);
+                }
+            }
+            xml += `${indent}</${removeUniqueId(nodeName)}>\n`;
         }
         return xml;
     }
@@ -116,7 +102,7 @@ export function jsonToXml(json) {
 
     for (const key in json) {
         if (key === '_declaration') continue;
-        xml += convertNodeToXml(json[key], key);
+        xml += convertNodeToXml(json[key], key, 1);
     }
 
     return xml;
