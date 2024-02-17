@@ -6,19 +6,20 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import 'diagram-js-minimap/assets/diagram-js-minimap.css';
 
-
 import minimapModule from 'diagram-js-minimap';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import {
     BpmnPropertiesPanelModule,
-    BpmnPropertiesProviderModule
+    BpmnPropertiesProviderModule,
+    CamundaPlatformPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
+import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 
 import { JParser } from './JParser';
 import { downloadJSON } from './Downloader';
-import { jsonToXml, xmlToJson } from './xml2json'
+import { jsonToXml, xmlToJson } from './xml2json';
 
-import './CamundaModeler.css'
+import './CamundaModeler.css';
 
 const CamundaModeler = () => {
     const bpmnModelerRef = useRef(null);
@@ -27,23 +28,32 @@ const CamundaModeler = () => {
     const [isOpen, setOpen] = useState(false);
 
     useEffect(() => {
-        bpmnModelerRef.current = new BpmnModeler({
-            container: '#bpmnview',
-            propertiesPanel: {
-                parent: '#propertiesview'
-            },
-            additionalModules: [
-                BpmnPropertiesPanelModule,
-                BpmnPropertiesProviderModule,
-                minimapModule
-            ]
-        });
+        try {
+            bpmnModelerRef.current = new BpmnModeler({
+                container: '#bpmnview',
+                propertiesPanel: {
+                    parent: '#propertiesview'
+                },
+                additionalModules: [
+                    BpmnPropertiesPanelModule,
+                    BpmnPropertiesProviderModule,
+                    CamundaPlatformPropertiesProviderModule,
+                    minimapModule
+                ],
+                moddleExtensions: {
+                    camunda: CamundaBpmnModdle
+                }
+            });
 
-        propertiesPanelRef.current = bpmnModelerRef.current.get('propertiesPanel');
+            propertiesPanelRef.current = bpmnModelerRef.current.get('propertiesPanel');
 
-        return () => {
-            bpmnModelerRef.current.destroy();
-        };
+            return () => {
+                bpmnModelerRef.current.destroy();
+            };
+        } catch (error) {
+            handleError(error.message);
+        }
+
     }, []);
 
     const handleError = (msg) => {
@@ -52,15 +62,20 @@ const CamundaModeler = () => {
     };
 
     const handleCreateDiagram = () => {
-        const bpmnModeler = bpmnModelerRef.current;
-        bpmnModeler.createDiagram((err, warnings) => {
-            if (err) {
-                handleError('Failed to create BPMN diagram: ' + err.message);
-            } else {
-                console.log('BPMN diagram created successfully');
-            }
-        });
-        setOpen(true);
+        try {
+
+            const bpmnModeler = bpmnModelerRef.current;
+            bpmnModeler.createDiagram((err, warnings) => {
+                if (err) {
+                    handleError('Failed to create BPMN diagram: ' + err.message);
+                } else {
+                    console.log('BPMN diagram created successfully');
+                }
+            });
+            setOpen(true);
+        } catch (error) {
+            handleError(error.message);
+        }
     };
 
     const handleSaveDiagram = async () => {

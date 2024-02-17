@@ -7,15 +7,13 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "bpmn-js": "^17.0.0",
+    "bpmn-js": "^17.0.2",
     "bpmn-js-properties-panel": "^5.11.1",
-    "buffer": "^6.0.3",
     "camunda-bpmn-moddle": "^7.0.1",
     "diagram-js-minimap": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "stream": "^0.0.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
