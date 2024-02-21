@@ -11,7 +11,7 @@ import BpmnModeler from 'bpmn-js/lib/Modeler';
 import {
     BpmnPropertiesPanelModule,
     BpmnPropertiesProviderModule,
-    CamundaPlatformPropertiesProviderModule
+    // CamundaPlatformPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 
@@ -37,7 +37,7 @@ const CamundaModeler = () => {
                 additionalModules: [
                     BpmnPropertiesPanelModule,
                     BpmnPropertiesProviderModule,
-                    CamundaPlatformPropertiesProviderModule,
+                    // CamundaPlatformPropertiesProviderModule,
                     minimapModule
                 ],
                 moddleExtensions: {

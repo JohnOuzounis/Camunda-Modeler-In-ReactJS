@@ -1,3 +1,4 @@
+import { removeUniqueId } from "./JParser";
 
 export function xmlToJson(xml) {
     let jsonString = '{\n';
@@ -80,10 +81,6 @@ export function xmlToJson(xml) {
 }
 
 export function jsonToXml(json) {
-    function removeUniqueId(input) {
-        return input.replace(/@!_\d+/g, '');
-    }
-
     function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
         const indent = '    '.repeat(depth);

@@ -143,3 +143,7 @@ export class JParser {
         return arr;
     }
 }
+
+export function removeUniqueId(input) {
+    return input.replace(/@!_\d+/g, '');
+}
