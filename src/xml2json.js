@@ -83,26 +83,25 @@ export function xmlToJson(xml) {
 export function jsonToXml(json) {
     function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
-        const indent = '    '.repeat(depth);
 
         if (typeof node === 'object') {
-            xml += `${indent}<${removeUniqueId(nodeName)}`;
+            xml += `<${removeUniqueId(nodeName)}`;
             if (node._attributes) {
                 for (const attrName in node._attributes) {
                     xml += ` ${attrName}="${node._attributes[attrName]}"`;
                 }
             }
-            xml += `>\n`;
+            xml += `>`;
 
             for (const key in node) {
                 if (key === '_attributes') continue;
                 if (key === '#text') {
-                    xml += `${'    '.repeat(depth + 1)}${node[key]}\n`;
+                    xml += `${node[key]}`;
                 } else {
                     xml += convertNodeToXml(node[key], key, depth + 1);
                 }
             }
-            xml += `${indent}</${removeUniqueId(nodeName)}>\n`;
+            xml += `</${removeUniqueId(nodeName)}>`;
         }
         return xml;
     }
