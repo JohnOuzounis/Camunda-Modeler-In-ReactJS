@@ -15,6 +15,9 @@ import {
 } from 'bpmn-js-properties-panel';
 import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 
+import tagPropertiesProviderModule from './providers/tags';
+import tagModdleDescriptor from './descriptors/tags';
+
 import { JParser } from './JParser';
 import { downloadJSON } from './Downloader';
 import { jsonToXml, xmlToJson } from './xml2json';
@@ -37,10 +40,12 @@ const CamundaModeler = () => {
                 additionalModules: [
                     BpmnPropertiesPanelModule,
                     BpmnPropertiesProviderModule,
+                    tagPropertiesProviderModule,
                     // CamundaPlatformPropertiesProviderModule,
                     minimapModule
                 ],
                 moddleExtensions: {
+                    tags: tagModdleDescriptor,
                     camunda: CamundaBpmnModdle
                 }
             });

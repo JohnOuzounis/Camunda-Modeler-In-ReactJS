@@ -1,0 +1,26 @@
+{
+  "name": "Tags",
+  "prefix": "tags",
+  "uri": "http://tags",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "associations": [],
+  "types": [
+    {
+      "name": "tags",
+      "properties": [
+        {
+          "name": "actionTag",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "eventTag",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}
