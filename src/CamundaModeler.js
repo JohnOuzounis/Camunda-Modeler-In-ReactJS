@@ -125,6 +125,14 @@ const CamundaModeler = () => {
         fileInputRef.current.click();
     };
 
+    const handleDeployDiagram = () => {
+        try {
+            throw Error('bobo diagram deployed');
+        } catch (error) {
+            handleError('Error occured while deploying diagram: ' + error.message);
+        }
+    };
+
     return (
         <div className='editor-container'>
             {
@@ -144,6 +152,7 @@ const CamundaModeler = () => {
                         <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
                         <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
                         <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
+                        <button className="action-button deploy-button" onClick={handleDeployDiagram}>Deploy</button>
                     </div>)
             }
             <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>

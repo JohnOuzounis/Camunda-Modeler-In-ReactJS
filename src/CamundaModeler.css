@@ -60,6 +60,10 @@
     margin-right: 10px;
 }
 
+.action-button.deploy-button {
+    margin-left: 850px;
+}
+
 .action-button:hover {
     background-color: #0056b3;
 }
