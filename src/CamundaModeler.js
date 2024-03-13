@@ -21,6 +21,7 @@ import tagModdleDescriptor from './descriptors/tags';
 import { JParser } from './JParser';
 import { downloadJSON } from './Downloader';
 import { jsonToXml, xmlToJson } from './xml2json';
+import DeployDiagram from './DeploymentForm';
 
 import './CamundaModeler.css';
 
@@ -29,6 +30,7 @@ const CamundaModeler = () => {
     const propertiesPanelRef = useRef(null);
     const fileInputRef = useRef(null);
     const [isOpen, setOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         try {
@@ -68,7 +70,6 @@ const CamundaModeler = () => {
 
     const handleCreateDiagram = () => {
         try {
-
             const bpmnModeler = bpmnModelerRef.current;
             bpmnModeler.createDiagram((err, warnings) => {
                 if (err) {
@@ -125,9 +126,9 @@ const CamundaModeler = () => {
         fileInputRef.current.click();
     };
 
-    const handleDeployDiagram = () => {
+    const handleDeployDiagram = (name, tenantId) => {
         try {
-            throw Error('bobo diagram deployed');
+            throw Error(name + " " + ((!tenantId.trim()) ? '' : tenantId));
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
         }
@@ -148,17 +149,27 @@ const CamundaModeler = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="button-container">
-                        <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
-                        <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
-                        <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
-                        <button className="action-button deploy-button" onClick={handleDeployDiagram}>Deploy</button>
-                    </div>)
+                    <div>
+                        <div className="button-container">
+                            <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
+                            <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
+                            <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
+                            <button className="action-button deploy-button" onClick={() => setIsModalOpen(true)}>Deploy</button>
+                        </div>
+                    </div>
+                )
             }
             <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>
             <div id="propertiesview" className={`properties-panel ${isOpen ? 'open' : 'closed'}`}></div>
             <input ref={fileInputRef} id="file-input" type="file" accept='.bpmn, .json' style={{ display: 'none' }} onChange={loadDiagram} />
-        </div>
+            <div>
+                <DeployDiagram
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onDeploy={handleDeployDiagram}
+                ></DeployDiagram>
+            </div>
+        </div >
     );
 };
 
