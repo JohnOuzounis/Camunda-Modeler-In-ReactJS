@@ -22,6 +22,7 @@ import { JParser } from './JParser';
 import { downloadJSON } from './Downloader';
 import { jsonToXml, xmlToJson } from './xml2json';
 import DeployDiagram from './DeploymentForm';
+import { RestClient } from './RestClient';
 
 import './CamundaModeler.css';
 
@@ -126,9 +127,12 @@ const CamundaModeler = () => {
         fileInputRef.current.click();
     };
 
-    const handleDeployDiagram = (name, tenantId) => {
+    const handleDeployDiagram = async (name, tenantId) => {
         try {
-            throw Error(name + " " + ((!tenantId.trim()) ? '' : tenantId));
+            const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
+            });
+            const client = new RestClient();
+            await client.createDeployment(name, tenantId, xml);
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
         }

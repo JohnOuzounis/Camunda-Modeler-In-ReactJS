@@ -5,25 +5,31 @@ export class RestClient {
         this.endpoint = endpoint;
     }
 
-    createDeployment(name, tenantID, data) {
-        const binaryData = new TextEncoder().encode(data);
-        const base64String = btoa(String.fromCharCode.apply(null, binaryData));
+    async createDeployment(name, tenantID, data) {
+        const form = new FormData();
+        form.append('tenant-id', ((!tenantID.trim()) ? '' : tenantID));
+        form.append('deployment-source', '');
+        form.append('deploy-changed-only', 'false');
+        form.append('enable-duplicate-filtering', 'false');
+        form.append('deployment-name', name);
+        form.append('deployment-activation-time', '');
+        form.append('data', new File([data], (name + '.bpmn')));
 
-        let body = {}
-        body['tenant-ID'] = tenantID;
-        body['deployment-name'] = name;
-        body['data'] = base64String;
-
-        fetch(`http://${this.host}:${this.port}/${this.endpoint}/deployment/create`, {
+        const response = await fetch(`http://${this.host}:${this.port}/${this.endpoint}/deployment/create`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'accept': 'application/json'
             },
-            body: JSON.stringify(body)
+            body: form
         })
-            .then(response => {
+            .then(async response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    try {
+                        const errorData = await response.json();
+                        throw new Error(JSON.stringify(errorData));
+                    } catch (error) {
+                        throw new Error(error);
+                    }
                 }
                 return response.json();
             })
@@ -31,7 +37,9 @@ export class RestClient {
                 console.log('Deployment successful:', data);
             })
             .catch(error => {
-                console.error('Error during deployment:', error);
+                throw error;
             });
+
+        return response;
     }
 }
