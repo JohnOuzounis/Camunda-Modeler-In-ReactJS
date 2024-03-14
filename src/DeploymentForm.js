@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function DeployDiagram({ isOpen, onClose, onDeploy }) {
+function DeployDiagram({ isFormOpen, onClose, onDeploy }) {
     const [name, setName] = useState('diagram');
     const [tenantId, setTenantID] = useState('');
 
@@ -15,7 +15,7 @@ function DeployDiagram({ isOpen, onClose, onDeploy }) {
     };
 
     return (
-        <div className={`modal ${isOpen ? 'open' : ''}`}>
+        <div className={`modal ${isFormOpen ? 'open' : ''}`}>
             <div className="modal-content">
                 <span className="close" onClick={onClose}>&times;</span>
                 <h2>Deploy diagram</h2>
@@ -24,8 +24,8 @@ function DeployDiagram({ isOpen, onClose, onDeploy }) {
                     <input type="text" value={name} defaultValue="diagram" onChange={(e) => setName(e.target.value)} />
                     <label>Tenant ID</label>
                     <input type="text" value={tenantId} placeholder="Optional" onChange={(e) => setTenantID(e.target.value)} />
-                    <button className='action-button' onClick={handleDeploy}>Deploy</button>
                 </form>
+                <button className='action-button' onClick={handleDeploy}>Deploy</button>
             </div>
         </div>
     );

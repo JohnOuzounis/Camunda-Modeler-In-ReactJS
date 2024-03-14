@@ -164,7 +164,7 @@ const CamundaModeler = () => {
             <input ref={fileInputRef} id="file-input" type="file" accept='.bpmn, .json' style={{ display: 'none' }} onChange={loadDiagram} />
             <div>
                 <DeployDiagram
-                    isOpen={isModalOpen}
+                    isFormOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onDeploy={handleDeployDiagram}
                 ></DeployDiagram>
