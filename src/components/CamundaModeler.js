@@ -21,8 +21,10 @@ import tagModdleDescriptor from './descriptors/tags';
 import { JParser } from './utils/JParser';
 import { downloadJSON } from './utils/Downloader';
 import { jsonToXml, xmlToJson } from './utils/xml2json';
-import DeployDiagram from './DeploymentForm';
 import { RestClient } from './utils/RestClient';
+
+import DeployDiagram from './DeploymentForm';
+import ErrorPanel from './ErrorPanel';
 
 import './style/CamundaModeler.css';
 
@@ -32,6 +34,9 @@ const CamundaModeler = () => {
     const fileInputRef = useRef(null);
     const [isOpen, setOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [errorOccured, setErrorOccured] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
         try {
@@ -59,14 +64,16 @@ const CamundaModeler = () => {
                 bpmnModelerRef.current.destroy();
             };
         } catch (error) {
-            handleError(error.message);
+            handleError(error.message, true);
         }
 
     }, []);
 
-    const handleError = (msg) => {
-        setOpen(false);
-        window.alert(msg);
+    const handleError = (msg, restart) => {
+        if (restart)
+            setOpen(false);
+        setErrorMsg(msg);
+        setErrorOccured(true);
     };
 
     const handleCreateDiagram = () => {
@@ -74,14 +81,14 @@ const CamundaModeler = () => {
             const bpmnModeler = bpmnModelerRef.current;
             bpmnModeler.createDiagram((err, warnings) => {
                 if (err) {
-                    handleError('Failed to create BPMN diagram: ' + err.message);
+                    handleError('Failed to create BPMN diagram: ' + err.message, true);
                 } else {
                     console.log('BPMN diagram created successfully');
                 }
             });
             setOpen(true);
         } catch (error) {
-            handleError(error.message);
+            handleError(error.message, true);
         }
     };
 
@@ -172,6 +179,11 @@ const CamundaModeler = () => {
                     onClose={() => setIsModalOpen(false)}
                     onDeploy={handleDeployDiagram}
                 ></DeployDiagram>
+
+                {errorOccured && <ErrorPanel
+                    message={errorMsg}
+                    onClose={() => { setErrorOccured(false); setErrorMsg(""); }}>
+                </ErrorPanel>}
             </div>
         </div >
     );

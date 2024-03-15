@@ -135,3 +135,48 @@
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+.error-panel {
+    display: none;
+    position: absolute;
+    top: 10px;
+    z-index: 99999;
+    width: 98%;
+    background-color: #ffcccc;
+    border: 1px solid #ff0000;
+    padding: 10px;
+    margin-left: 2px;
+}
+
+.error-panel.shown {
+    display: block;
+}
+
+.error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.error-message {
+    color: #f94040e8;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    word-wrap: break-word;
+    overflow: auto;
+    max-width: 90%;
+}
+
+.action-button.error {
+    background-color: #ff0000;
+    color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.action-button.error:hover {
+    background-color: #cc0000;
+}
