@@ -18,13 +18,13 @@ import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 import tagPropertiesProviderModule from './providers/tags';
 import tagModdleDescriptor from './descriptors/tags';
 
-import { JParser } from './JParser';
-import { downloadJSON } from './Downloader';
-import { jsonToXml, xmlToJson } from './xml2json';
+import { JParser } from './utils/JParser';
+import { downloadJSON } from './utils/Downloader';
+import { jsonToXml, xmlToJson } from './utils/xml2json';
 import DeployDiagram from './DeploymentForm';
-import { RestClient } from './RestClient';
+import { RestClient } from './utils/RestClient';
 
-import './CamundaModeler.css';
+import './style/CamundaModeler.css';
 
 const CamundaModeler = () => {
     const bpmnModelerRef = useRef(null);

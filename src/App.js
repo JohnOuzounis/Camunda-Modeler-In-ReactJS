@@ -1,6 +1,6 @@
 import React from 'react';
 
-import CamundaModeler from './CamundaModeler';
+import CamundaModeler from './components/CamundaModeler';
 
 function App() {
   return (
