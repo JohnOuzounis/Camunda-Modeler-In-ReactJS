@@ -139,8 +139,6 @@ const CamundaModeler = () => {
         try {
             const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
             });
-            const engine = new Engine(xml, CamundaBpmnModdle);
-            engine.getEngine();
             const client = new RestClient();
             await client.createDeployment(name, tenantId, xml);
         } catch (error) {
