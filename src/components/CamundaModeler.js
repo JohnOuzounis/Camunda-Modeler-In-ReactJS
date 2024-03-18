@@ -25,6 +25,7 @@ import { RestClient } from './utils/RestClient';
 
 import DeployDiagram from './DeploymentForm';
 import ErrorPanel from './ErrorPanel';
+import { Engine } from './CamundaEngine';
 
 import './style/CamundaModeler.css';
 
@@ -138,11 +139,14 @@ const CamundaModeler = () => {
         try {
             const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
             });
+            const engine = new Engine(xml, CamundaBpmnModdle);
+            engine.getEngine();
             const client = new RestClient();
             await client.createDeployment(name, tenantId, xml);
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
         }
+
     };
 
     return (

@@ -47,6 +47,18 @@ export function xmlToJson(xml) {
                         jsonString += ',\n';
                     }
                 }
+                if (node.nodeName === "bpmn:process") {
+                    jsonString += `,\n${indent}"camunda:historyTimeToLive": "180"\n`;
+                }
+
+                if (node.nodeName === "bpmn:definitions") {
+                    jsonString += ',\n';
+                    jsonString += `${indent}"xmlns:modeler":"http://camunda.org/schema/modeler/1.0",\n`;
+                    jsonString += `${indent}"exporter":"Camunda Modeler",\n`;
+                    jsonString += `${indent}"exporterVersion":"5.17.0",\n`;
+                    jsonString += `${indent}"modeler:executionPlatform":"Camunda Platform"`;
+                }
+
                 updateIndent(-2);
                 jsonString += `\n${indent}}`;
                 updateIndent(-2);
