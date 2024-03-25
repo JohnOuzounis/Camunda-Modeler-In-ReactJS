@@ -134,12 +134,12 @@ const CamundaModeler = () => {
         fileInputRef.current.click();
     };
 
-    const handleDeployDiagram = async (name, tenantId) => {
+    const handleDeployDiagram = async (name) => {
         try {
             const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
             });
             const client = new RestClient();
-            const res = await client.executeDiagram("test", { id: 200 }, xml);
+            const res = await client.executeDiagram(name, { id: 200 }, xml);
             console.log(res);
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
