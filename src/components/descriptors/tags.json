@@ -8,7 +8,17 @@
   "associations": [],
   "types": [
     {
-      "name": "tags",
+      "name": "mytags",
+      "extends": [
+        "bpmn:StartEvent",
+        "bpmn:ExclusiveGateway",
+        "bpmn:IntermediateThrowEvent",
+        "bpmn:Task",
+        "bpmn:SubProcess",
+        "bpmn:DataObjectReference",
+        "bpmn:DataStoreReference",
+        "bpmn:EndEvent"
+      ],
       "properties": [
         {
           "name": "actionTag",

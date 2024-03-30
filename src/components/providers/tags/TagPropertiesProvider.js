@@ -1,6 +1,3 @@
-// Import your custom property entries.
-// The entry is a text input field with logic attached to create,
-// update and delete the "spell" property.
 import TagProps from './TagsProps';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
