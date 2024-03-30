@@ -40,6 +40,10 @@ This is a React web application for creating, editing, and visualizing BPMN diag
 
 3. Follow the on-screen instructions to create, load, and save BPMN diagrams.
 
+## Engine 
+To execute the diagrams install the backend server and start the bpmn engine.
+Refer to the [Engine](https://github.com/JohnOuzounis/engine) for more details.
+
 ## Examples
 
 For examples and usage of bpmn-js, you can refer to the official bpmn-js examples repository:
