@@ -17,6 +17,8 @@ import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 
 import tagPropertiesProviderModule from './providers/tags';
 import tagModdleDescriptor from './descriptors/tags';
+import conditionPropertiesProviderModule from './providers/conditions';
+import conditionModdleDescriptor from './descriptors/conditions';
 
 import { JParser } from './utils/JParser';
 import { downloadJSON } from './utils/Downloader';
@@ -49,11 +51,13 @@ const CamundaModeler = () => {
                     BpmnPropertiesPanelModule,
                     BpmnPropertiesProviderModule,
                     tagPropertiesProviderModule,
+                    conditionPropertiesProviderModule,
                     // CamundaPlatformPropertiesProviderModule,
                     minimapModule
                 ],
                 moddleExtensions: {
                     tags: tagModdleDescriptor,
+                    conditions: conditionModdleDescriptor,
                     camunda: CamundaBpmnModdle
                 }
             });
@@ -117,7 +121,7 @@ const CamundaModeler = () => {
                 } else if (fileType === 'json') {
                     const parser = new JParser(e.target.result);
                     const bpmnJSON = parser.parse();
-                    bpmnXML = jsonToXml(bpmnJSON);
+                    bpmnXML = jsonToXml(bpmnJSON, true);
                 }
                 const modeler = bpmnModelerRef.current;
                 modeler.importXML(bpmnXML);

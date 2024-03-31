@@ -42,25 +42,30 @@ export function xmlToJson(xml) {
                 updateIndent(2);
                 for (let i = 0; i < node.attributes.length; i++) {
                     const attribute = node.attributes[i];
+                    if (node.nodeName === 'bpmn:sequenceFlow' && attribute.nodeName === "conditions:condition")
+                        continue;
                     jsonString += `${indent}"${attribute.nodeName}": "${attribute.nodeValue}"`;
-                    if (i < node.attributes.length - 1) {
+                    if (i < node.attributes.length - 1 && node.attributes[i + 1].nodeName !== "conditions:condition") {
                         jsonString += ',\n';
                     }
-                }
-                if (node.nodeName === "bpmn:process") {
-                    jsonString += `,\n${indent}"camunda:historyTimeToLive": "180"\n`;
-                }
-
-                if (node.nodeName === "bpmn:definitions") {
-                    jsonString += ',\n';
-                    jsonString += `${indent}"xmlns:modeler":"http://camunda.org/schema/modeler/1.0",\n`;
-                    jsonString += `${indent}"exporter":"Camunda Modeler",\n`;
-                    jsonString += `${indent}"exporterVersion":"5.17.0",\n`;
-                    jsonString += `${indent}"modeler:executionPlatform":"Camunda Platform"`;
                 }
 
                 updateIndent(-2);
                 jsonString += `\n${indent}}`;
+                if (node.nodeName === 'bpmn:sequenceFlow' && node.attributes['conditions:condition']) {
+                    jsonString += ',\n';
+                    jsonString += `${indent}"bpmn:conditionExpression": {\n`;
+                    updateIndent(2);
+                    jsonString += `${indent}"_attributes": {\n`;
+                    updateIndent(2);
+                    jsonString += `${indent}"xsi:type": "tFormalExpression",\n`;
+                    jsonString += `${indent}"language": "JavaScript"`;
+                    updateIndent(-2);
+                    jsonString += `\n${indent}},\n`;
+                    jsonString += `${indent}"#text": "<![CDATA[next(null, this.environment.variables.${node.attributes['conditions:condition'].nodeValue});]]>"`;
+                    updateIndent(-2);
+                    jsonString += `\n${indent}}`;
+                }
                 updateIndent(-2);
             }
 
@@ -92,15 +97,23 @@ export function xmlToJson(xml) {
     return jsonString;
 }
 
-export function jsonToXml(json) {
-    function convertNodeToXml(node, nodeName, depth) {
+export function jsonToXml(json, forModeler) {
+    function convertNodeToXml(node, nodeName) {
         let xml = '';
 
         if (typeof node === 'object') {
+            if (forModeler && nodeName === 'bpmn:conditionExpression') return xml;
             xml += `<${removeUniqueId(nodeName)}`;
             if (node._attributes) {
                 for (const attrName in node._attributes) {
                     xml += ` ${attrName}="${node._attributes[attrName]}"`;
+                }
+            }
+            if (forModeler && nodeName === 'bpmn:sequenceFlow') {
+                const cond = node['bpmn:conditionExpression'];
+                if (cond) {
+                    let match = cond['#text'].match(/\.variables\.(.*?)(?=\);)/)
+                    xml += ` conditions:condition="${match[1]}"`;
                 }
             }
             xml += `>`;
@@ -110,7 +123,7 @@ export function jsonToXml(json) {
                 if (key === '#text') {
                     xml += `${node[key]}`;
                 } else {
-                    xml += convertNodeToXml(node[key], key, depth + 1);
+                    xml += convertNodeToXml(node[key], key);
                 }
             }
             xml += `</${removeUniqueId(nodeName)}>`;
@@ -122,7 +135,7 @@ export function jsonToXml(json) {
 
     for (const key in json) {
         if (key === '_declaration') continue;
-        xml += convertNodeToXml(json[key], key, 1);
+        xml += convertNodeToXml(json[key], key);
     }
 
     return xml;

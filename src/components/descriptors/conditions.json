@@ -1,0 +1,24 @@
+{
+  "name": "Conditions",
+  "prefix": "conditions",
+  "uri": "http://conditions",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "associations": [],
+  "types": [
+    {
+      "name": "myconditions",
+      "extends": [
+        "bpmn:SequenceFlow"
+      ],
+      "properties": [
+        {
+          "name": "condition",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}
