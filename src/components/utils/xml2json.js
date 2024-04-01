@@ -58,7 +58,7 @@ export function xmlToJson(xml) {
                     updateIndent(2);
                     jsonString += `${indent}"_attributes": {\n`;
                     updateIndent(2);
-                    jsonString += `${indent}"xsi:type": "tFormalExpression",\n`;
+                    jsonString += `${indent}"xsi:type": "bpmn:tFormalExpression",\n`;
                     jsonString += `${indent}"language": "JavaScript"`;
                     updateIndent(-2);
                     jsonString += `\n${indent}},\n`;

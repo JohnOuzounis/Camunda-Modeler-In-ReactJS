@@ -142,8 +142,11 @@ const CamundaModeler = () => {
         try {
             const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
             });
+            const parser = new JParser(xmlToJson(xml));
+            const bpmnXML = jsonToXml(parser.parse());
+
             const client = new RestClient();
-            const res = await client.executeDiagram(name, variables, xml);
+            const res = await client.executeDiagram(name, variables, bpmnXML);
             console.log(res);
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
