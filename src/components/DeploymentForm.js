@@ -36,8 +36,10 @@ function DeployDiagram({ isFormOpen, onClose, onDeploy }) {
         variables.forEach(variable => {
             if (!isNaN(variable.value))
                 vars[variable.name] = parseFloat(variable.value)
-            if (variable.value === 'true' || variable.value === 'false')
+            else if (variable.value === 'true' || variable.value === 'false')
                 vars[variable.name] = Boolean(variable.value);
+            else
+                vars[variable.name] = variable.value;
         });
         onDeploy(name, vars);
         onClose();
