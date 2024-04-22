@@ -42,10 +42,16 @@ export function xmlToJson(xml) {
                 updateIndent(2);
                 for (let i = 0; i < node.attributes.length; i++) {
                     const attribute = node.attributes[i];
-                    if (node.nodeName === 'bpmn:sequenceFlow' && attribute.nodeName === "conditions:condition")
+                    if (node.nodeName === 'bpmn:sequenceFlow' &&
+                        (attribute.nodeName === "conditions:condition" ||
+                            attribute.nodeName === "conditions:variable" ||
+                            attribute.nodeName === "conditions:value"))
                         continue;
                     jsonString += `${indent}"${attribute.nodeName}": "${attribute.nodeValue}"`;
-                    if (i < node.attributes.length - 1 && node.attributes[i + 1].nodeName !== "conditions:condition") {
+                    if (i < node.attributes.length - 1 &&
+                        (node.attributes[i + 1].nodeName !== "conditions:condition" &&
+                            node.attributes[i + 1].nodeName !== "conditions:variable" &&
+                            node.attributes[i + 1].nodeName !== "conditions:value")) {
                         jsonString += ',\n';
                     }
                 }
@@ -58,11 +64,10 @@ export function xmlToJson(xml) {
                     updateIndent(2);
                     jsonString += `${indent}"_attributes": {\n`;
                     updateIndent(2);
-                    jsonString += `${indent}"xsi:type": "bpmn:tFormalExpression",\n`;
-                    jsonString += `${indent}"language": "JavaScript"`;
+                    jsonString += `${indent}"xsi:type": "bpmn:tFormalExpression"`;
                     updateIndent(-2);
                     jsonString += `\n${indent}},\n`;
-                    jsonString += `${indent}"#text": "<![CDATA[next(null, this.environment.variables.${node.attributes['conditions:condition'].nodeValue});]]>"`;
+                    jsonString += `${indent}"#text": "\${environment.services.${node.attributes['conditions:condition'].nodeValue}(environment.variables.${node.attributes['conditions:variable'].nodeValue}, ${node.attributes['conditions:value'].nodeValue})}"`;
                     updateIndent(-2);
                     jsonString += `\n${indent}}`;
                 }
@@ -98,35 +103,56 @@ export function xmlToJson(xml) {
 }
 
 export function jsonToXml(json, forModeler) {
-    function convertNodeToXml(node, nodeName) {
+    function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
+        const indent = '    '.repeat(depth);
+        const nodeNameStripped = removeUniqueId(nodeName);
+
 
         if (typeof node === 'object') {
-            if (forModeler && nodeName === 'bpmn:conditionExpression') return xml;
-            xml += `<${removeUniqueId(nodeName)}`;
+            if (forModeler && nodeNameStripped === 'bpmn:conditionExpression') return xml;
+            xml += `${indent}<${removeUniqueId(nodeName)}`;
             if (node._attributes) {
                 for (const attrName in node._attributes) {
                     xml += ` ${attrName}="${node._attributes[attrName]}"`;
                 }
             }
-            if (forModeler && nodeName === 'bpmn:sequenceFlow') {
+            if (forModeler && nodeNameStripped === 'bpmn:sequenceFlow') {
                 const cond = node['bpmn:conditionExpression'];
                 if (cond) {
-                    let match = cond['#text'].match(/\.variables\.(.*?)(?=\);)/)
-                    xml += ` conditions:condition="${match[1]}"`;
+                    const serviceNameStartIndex = cond["#text"].indexOf('services.') + 'services.'.length;
+                    const serviceNameEndIndex = cond["#text"].indexOf('(');
+                    const condition = cond["#text"].substring(serviceNameStartIndex, serviceNameEndIndex);
+
+                    // Extracting variable
+                    const variableStartIndex = cond["#text"].indexOf('variables.') + 'variables.'.length;
+                    const variableEndIndex = cond["#text"].indexOf(',', variableStartIndex);
+                    const variable = cond["#text"].substring(variableStartIndex, variableEndIndex).trim();
+
+                    // Extracting value
+                    const valueStartIndex = variableEndIndex + 1;
+                    const valueEndIndex = cond["#text"].lastIndexOf(')');
+                    const value = cond["#text"].substring(valueStartIndex, valueEndIndex).trim();
+
+                    xml += ` conditions:condition="${condition}"`;
+                    xml += ` conditions:variable="${variable}"`;
+                    xml += ` conditions:value="${value}"`;
                 }
             }
-            xml += `>`;
+            xml += `>${(nodeNameStripped === 'bpmn:conditionExpression') ? '' : '\n'}`;
 
             for (const key in node) {
                 if (key === '_attributes') continue;
                 if (key === '#text') {
-                    xml += `${node[key]}`;
+                    if (nodeNameStripped === 'bpmn:conditionExpression')
+                        xml += `${node[key]}`;
+                    else
+                        xml += `${'    '.repeat(depth + 1)}${node[key]}\n`;
                 } else {
-                    xml += convertNodeToXml(node[key], key);
+                    xml += convertNodeToXml(node[key], key, depth + 1);
                 }
             }
-            xml += `</${removeUniqueId(nodeName)}>`;
+            xml += `${(nodeNameStripped === 'bpmn:conditionExpression') ? '' : indent}</${removeUniqueId(nodeName)}>\n`;
         }
         return xml;
     }
@@ -135,7 +161,7 @@ export function jsonToXml(json, forModeler) {
 
     for (const key in json) {
         if (key === '_declaration') continue;
-        xml += convertNodeToXml(json[key], key);
+        xml += convertNodeToXml(json[key], key, 1);
     }
 
     return xml;

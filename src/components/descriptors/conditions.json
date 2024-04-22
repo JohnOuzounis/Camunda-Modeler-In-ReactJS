@@ -17,6 +17,16 @@
           "name": "condition",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "variable",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "value",
+          "isAttr": true,
+          "type": "String"
         }
       ]
     }
