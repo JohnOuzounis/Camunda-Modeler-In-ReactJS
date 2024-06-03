@@ -1,150 +1,94 @@
-import { removeUniqueId } from "./JParser";
+export function xmlToJson(xmlString) {
+    let parser = new DOMParser();
+    let xmlDoc = parser.parseFromString(xmlString, "text/xml");
+    const filterEmptyTextNodes = (node) => {
+        const childNodes = node.childNodes;
+        for (let i = childNodes.length - 1; i >= 0; i--) {
+            const childNode = childNodes[i];
+            if (childNode.nodeType === 3 && !childNode.nodeValue.trim()) {
+                node.removeChild(childNode);
+            } else if (childNode.nodeType === 1) {
+                filterEmptyTextNodes(childNode);
+            }
+        }
+    }
+    filterEmptyTextNodes(xmlDoc);
 
-export function xmlToJson(xml) {
-    let jsonString = '{\n';
+    function parseNode(xml) {
+        let obj = {};
 
-    if (typeof xml === 'string') {
-        const parser = new DOMParser();
-        xml = parser.parseFromString(xml, 'text/xml');
+        if (xml.nodeType === 1) { // element
+            if (xml.attributes.length > 0) {
+                obj["@attributes"] = {};
+                for (let j = 0; j < xml.attributes.length; j++) {
+                    let attribute = xml.attributes.item(j);
+                    obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+                }
+            }
+        } else if (xml.nodeType === 3) { // text
+            obj = xml.nodeValue;
+        }
 
-        const filterEmptyTextNodes = (node) => {
-            const childNodes = node.childNodes;
-            for (let i = childNodes.length - 1; i >= 0; i--) {
-                const childNode = childNodes[i];
-                if (childNode.nodeType === Node.TEXT_NODE && !childNode.nodeValue.trim()) {
-                    node.removeChild(childNode);
-                } else if (childNode.nodeType === Node.ELEMENT_NODE) {
-                    filterEmptyTextNodes(childNode);
+        if (xml.hasChildNodes()) {
+            for (let i = 0; i < xml.childNodes.length; i++) {
+                let item = xml.childNodes.item(i);
+                let nodeName = item.nodeName;
+                if (typeof (obj[nodeName]) === "undefined") {
+                    obj[nodeName] = parseNode(item);
+                } else {
+                    if (typeof (obj[nodeName].push) === "undefined") {
+                        let old = obj[nodeName];
+                        obj[nodeName] = [];
+                        obj[nodeName].push(old);
+                    }
+                    obj[nodeName].push(parseNode(item));
                 }
             }
         }
-        filterEmptyTextNodes(xml);
+
+        return obj;
     }
 
-    if (!(xml instanceof XMLDocument)) {
-        return jsonString + '}';
-    }
-
-    const parseNode = (node, depth) => {
-        let indent = '  '.repeat(depth);
-        function updateIndent(val) {
-            depth += val;
-            depth = (depth <= 0) ? 0 : depth;
-            indent = '  '.repeat(depth);
-        };
-
-        if (node.nodeType === Node.ELEMENT_NODE) {
-            jsonString += `${indent}"${node.nodeName}": {\n`;
-
-            if (node.attributes.length > 0) {
-                updateIndent(2);
-                jsonString += `${indent}"_attributes": {\n`;
-                updateIndent(2);
-                for (let i = 0; i < node.attributes.length; i++) {
-                    const attribute = node.attributes[i];
-                    if (node.nodeName === 'bpmn:sequenceFlow' &&
-                        (attribute.nodeName === "conditions:condition" ||
-                            attribute.nodeName === "conditions:variable" ||
-                            attribute.nodeName === "conditions:value"))
-                        continue;
-                    jsonString += `${indent}"${attribute.nodeName}": "${attribute.nodeValue}"`;
-                    if (i < node.attributes.length - 1 &&
-                        (node.attributes[i + 1].nodeName !== "conditions:condition" &&
-                            node.attributes[i + 1].nodeName !== "conditions:variable" &&
-                            node.attributes[i + 1].nodeName !== "conditions:value")) {
-                        jsonString += ',\n';
-                    }
-                }
-
-                updateIndent(-2);
-                jsonString += `\n${indent}}`;
-                if (node.nodeName === 'bpmn:sequenceFlow' && node.attributes['conditions:condition']) {
-                    jsonString += ',\n';
-                    jsonString += `${indent}"bpmn:conditionExpression": {\n`;
-                    updateIndent(2);
-                    jsonString += `${indent}"_attributes": {\n`;
-                    updateIndent(2);
-                    jsonString += `${indent}"xsi:type": "bpmn:tFormalExpression"`;
-                    updateIndent(-2);
-                    jsonString += `\n${indent}},\n`;
-                    jsonString += `${indent}"#text": "\${environment.services.${node.attributes['conditions:condition'].nodeValue}(environment.variables.${node.attributes['conditions:variable'].nodeValue}, ${node.attributes['conditions:value'].nodeValue})}"`;
-                    updateIndent(-2);
-                    jsonString += `\n${indent}}`;
-                }
-                updateIndent(-2);
-            }
-
-            if (node.childNodes.length > 0) {
-                if (node.attributes.length > 0) {
-                    jsonString += ',\n';
-                }
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    const childNode = node.childNodes[i];
-                    parseNode(childNode, depth + 2);
-                    if (i < node.childNodes.length - 1) {
-                        jsonString += ',\n';
-                    }
-                }
-            }
-
-            jsonString += `\n${indent}}`;
-        }
-        else if (node.nodeType === Node.TEXT_NODE) {
-            const textValue = node.nodeValue.trim();
-            if (textValue) {
-                jsonString += `${indent}"#text": "${textValue}"`;
-            }
-        }
-    };
-    parseNode(xml.documentElement, 2);
-    jsonString += '\n}';
-
-    return jsonString;
+    let jsonResult = parseNode(xmlDoc.documentElement);
+    return { "bpmn:definitions": jsonResult };
 }
 
 export function jsonToXml(json, forModeler) {
     function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
         const indent = '    '.repeat(depth);
-        const nodeNameStripped = removeUniqueId(nodeName);
 
+        if (Array.isArray(node)) {
+            node.forEach(item => {
+                xml += convertNodeToXml(item, nodeName, depth);
+            });
+        } else if (typeof node === 'object') {
+            xml += `${indent}<${nodeName}`;
 
-        if (typeof node === 'object') {
-            if (forModeler && nodeNameStripped === 'bpmn:conditionExpression') return xml;
-            xml += `${indent}<${removeUniqueId(nodeName)}`;
-            if (node._attributes) {
-                for (const attrName in node._attributes) {
-                    xml += ` ${attrName}="${node._attributes[attrName]}"`;
+            if (node["@attributes"]) {
+                for (const attrName in node["@attributes"]) {
+                    if (!(!forModeler && nodeName.includes("sequenceFlow") && attrName.includes("condition")))
+                        xml += ` ${attrName}="${node["@attributes"][attrName]}"`;
                 }
             }
-            if (forModeler && nodeNameStripped === 'bpmn:sequenceFlow') {
-                const cond = node['bpmn:conditionExpression'];
+            xml += '>\n';
+
+            if (!forModeler && nodeName.includes("sequenceFlow")) {
+                const cond = node["@attributes"]["conditions:condition"];
+                const variable = node["@attributes"]["conditions:variable"];
+                const value = node["@attributes"]["conditions:value"];
+
                 if (cond) {
-                    const serviceNameStartIndex = cond["#text"].indexOf('services.') + 'services.'.length;
-                    const serviceNameEndIndex = cond["#text"].indexOf('(');
-                    const condition = cond["#text"].substring(serviceNameStartIndex, serviceNameEndIndex);
-
-                    // Extracting variable
-                    const variableStartIndex = cond["#text"].indexOf('variables.') + 'variables.'.length;
-                    const variableEndIndex = cond["#text"].indexOf(',', variableStartIndex);
-                    const variable = cond["#text"].substring(variableStartIndex, variableEndIndex).trim();
-
-                    // Extracting value
-                    const valueStartIndex = variableEndIndex + 1;
-                    const valueEndIndex = cond["#text"].lastIndexOf(')');
-                    const value = cond["#text"].substring(valueStartIndex, valueEndIndex).trim();
-
-                    xml += ` conditions:condition="${condition}"`;
-                    xml += ` conditions:variable="${variable}"`;
-                    xml += ` conditions:value="${value}"`;
+                    let condition = "<bpmn:conditionExpression>\${environment.services." + cond;
+                    condition += "(environment.variables." + variable + "," + value + ")}</bpmn:conditionExpression>";
+                    xml += condition + "\n"
                 }
             }
-            xml += `>${(nodeNameStripped === 'bpmn:conditionExpression') ? '' : '\n'}`;
 
             for (const key in node) {
-                if (key === '_attributes') continue;
+                if (key === '@attributes') continue;
                 if (key === '#text') {
-                    if (nodeNameStripped === 'bpmn:conditionExpression')
+                    if (nodeName === 'bpmn:text')
                         xml += `${node[key]}`;
                     else
                         xml += `${'    '.repeat(depth + 1)}${node[key]}\n`;
@@ -152,15 +96,17 @@ export function jsonToXml(json, forModeler) {
                     xml += convertNodeToXml(node[key], key, depth + 1);
                 }
             }
-            xml += `${(nodeNameStripped === 'bpmn:conditionExpression') ? '' : indent}</${removeUniqueId(nodeName)}>\n`;
+            xml += `${indent}</${nodeName}>\n`;
+        } else {
+            xml += `${indent}<${nodeName}>${node}</${nodeName}>\n`;
         }
+
         return xml;
     }
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 
     for (const key in json) {
-        if (key === '_declaration') continue;
         xml += convertNodeToXml(json[key], key, 1);
     }
 

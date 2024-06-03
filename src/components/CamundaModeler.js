@@ -21,7 +21,7 @@ import conditionPropertiesProviderModule from './providers/conditions';
 import conditionModdleDescriptor from './descriptors/conditions';
 
 import { JParser } from './utils/JParser';
-import { downloadJSON } from './utils/Downloader';
+import { downloadJSON, downloadXML } from './utils/Downloader';
 import { jsonToXml, xmlToJson } from './utils/xml2json';
 import { RestClient } from './utils/RestClient';
 
@@ -102,7 +102,7 @@ const CamundaModeler = () => {
             const { xml } = await bpmnModeler.saveXML({ format: true }, function (err, xml) {
             });
             const json = xmlToJson(xml);
-            downloadJSON(json);
+            downloadJSON(JSON.stringify(json, null, 4));
         } catch (error) {
             handleError('Error converting BPMN diagram to JSON: ' + error.message);
         }
@@ -142,11 +142,18 @@ const CamundaModeler = () => {
         try {
             const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
             });
-            const parser = new JParser(xmlToJson(xml));
-            const bpmnXML = jsonToXml(parser.parse());
+            let bpmnXML = jsonToXml(xmlToJson(xml));
 
             const client = new RestClient();
             const res = await client.executeDiagram(name, variables, bpmnXML);
+
+            // fix conversion from engine to modeler
+            // if (res.data.message.source) {
+            //     parser = new JParser(xmlToJson(res.data.message.source));
+            //     bpmnXML = jsonToXml(xmlToJson(res.data.message.source), true);
+            //     bpmnModelerRef.current.importXML(bpmnXML);
+            // }
+
             console.log(res);
         } catch (error) {
             handleError('Error occured while deploying diagram: ' + error.message);
