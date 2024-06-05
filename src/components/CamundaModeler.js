@@ -20,7 +20,6 @@ import tagModdleDescriptor from './descriptors/tags';
 import conditionPropertiesProviderModule from './providers/conditions';
 import conditionModdleDescriptor from './descriptors/conditions';
 
-import { JParser } from './utils/JParser';
 import { downloadJSON, downloadXML } from './utils/Downloader';
 import { jsonToXml, xmlToJson } from './utils/xml2json';
 import { RestClient } from './utils/RestClient';
@@ -119,9 +118,7 @@ const CamundaModeler = () => {
                 if (fileType === 'bpmn') {
                     bpmnXML = e.target.result;
                 } else if (fileType === 'json') {
-                    const parser = new JParser(e.target.result);
-                    const bpmnJSON = parser.parse();
-                    bpmnXML = jsonToXml(bpmnJSON, true);
+                    bpmnXML = jsonToXml(JSON.parse(e.target.result));
                 }
                 const modeler = bpmnModelerRef.current;
                 modeler.importXML(bpmnXML);
@@ -149,7 +146,6 @@ const CamundaModeler = () => {
 
             // fix conversion from engine to modeler
             // if (res.data.message.source) {
-            //     parser = new JParser(xmlToJson(res.data.message.source));
             //     bpmnXML = jsonToXml(xmlToJson(res.data.message.source), true);
             //     bpmnModelerRef.current.importXML(bpmnXML);
             // }
