@@ -118,7 +118,7 @@ const CamundaModeler = () => {
                 if (fileType === 'bpmn') {
                     bpmnXML = e.target.result;
                 } else if (fileType === 'json') {
-                    bpmnXML = jsonToXml(JSON.parse(e.target.result));
+                    bpmnXML = jsonToXml(JSON.parse(e.target.result), true);
                 }
                 const modeler = bpmnModelerRef.current;
                 modeler.importXML(bpmnXML);
