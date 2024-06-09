@@ -3,6 +3,7 @@ import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+import 'bpmn-js-embedded-comments/assets/comments.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import 'diagram-js-minimap/assets/diagram-js-minimap.css';
 
@@ -14,6 +15,7 @@ import {
     // CamundaPlatformPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
+import EmbeddedComments from 'bpmn-js-embedded-comments';
 
 import tagPropertiesProviderModule from './providers/tags';
 import tagModdleDescriptor from './descriptors/tags';
@@ -28,6 +30,7 @@ import DeployDiagram from './DeploymentForm';
 import ErrorPanel from './ErrorPanel';
 
 import './style/CamundaModeler.css';
+import './style/comments.css';
 
 const CamundaModeler = () => {
     const bpmnModelerRef = useRef(null);
@@ -52,7 +55,8 @@ const CamundaModeler = () => {
                     tagPropertiesProviderModule,
                     conditionPropertiesProviderModule,
                     // CamundaPlatformPropertiesProviderModule,
-                    minimapModule
+                    minimapModule,
+                    EmbeddedComments
                 ],
                 moddleExtensions: {
                     tags: tagModdleDescriptor,
