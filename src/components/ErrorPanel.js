@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function ErrorPanel({ message, onClose }) {
-    const [show, setShow] = useState('true');
+    const [show, setShow] = useState(true);
 
     const close = () => {
         setShow(false);
