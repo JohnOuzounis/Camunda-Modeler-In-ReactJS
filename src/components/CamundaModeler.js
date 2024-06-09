@@ -64,6 +64,9 @@ const CamundaModeler = () => {
                     tags: tagModdleDescriptor,
                     conditions: conditionModdleDescriptor,
                     camunda: CamundaBpmnModdle
+                },
+                keyboard: {
+                    bindTo: document
                 }
             });
 
