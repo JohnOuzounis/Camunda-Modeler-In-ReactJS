@@ -16,6 +16,7 @@ import {
 } from 'bpmn-js-properties-panel';
 import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 import EmbeddedComments from 'bpmn-js-embedded-comments';
+import ColorPickerModule from 'bpmn-js-color-picker';
 
 import tagPropertiesProviderModule from './providers/tags';
 import tagModdleDescriptor from './descriptors/tags';
@@ -56,7 +57,8 @@ const CamundaModeler = () => {
                     conditionPropertiesProviderModule,
                     // CamundaPlatformPropertiesProviderModule,
                     minimapModule,
-                    EmbeddedComments
+                    EmbeddedComments,
+                    ColorPickerModule
                 ],
                 moddleExtensions: {
                     tags: tagModdleDescriptor,
