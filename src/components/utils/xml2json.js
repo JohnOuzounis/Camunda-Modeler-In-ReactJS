@@ -75,12 +75,9 @@ export function jsonToXml(json, forModeler) {
 
             if (!forModeler && nodeName.includes("sequenceFlow")) {
                 const cond = node["@attributes"]["conditions:condition"];
-                const variable = node["@attributes"]["conditions:variable"];
-                const value = node["@attributes"]["conditions:value"];
 
                 if (cond) {
-                    let condition = "<bpmn:conditionExpression>\${environment.services." + cond;
-                    condition += "(environment.variables." + variable + "," + value + ")}</bpmn:conditionExpression>";
+                    let condition = "<bpmn:conditionExpression>" + cond + "</bpmn:conditionExpression>";
                     xml += condition + "\n"
                 }
             }
