@@ -10,7 +10,7 @@ To integrate the properties panel properly create your react project using Vite 
  ```
 
 Also to properly integrate the embedded-comments module you will need the comments.css file
-under src/components/style 
+under src/styles 
 
 ## Features
 
