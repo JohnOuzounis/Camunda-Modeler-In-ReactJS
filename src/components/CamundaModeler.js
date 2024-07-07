@@ -23,12 +23,8 @@ import tagModdleDescriptor from './descriptors/tags';
 import conditionPropertiesProviderModule from './providers/conditions';
 import conditionModdleDescriptor from './descriptors/conditions';
 
-import { downloadJSON, downloadXML } from './utils/Downloader';
+import { downloadJSON } from './utils/Downloader';
 import { jsonToXml, xmlToJson } from './utils/xml2json';
-import { RestClient } from './utils/RestClient';
-
-import DeployDiagram from './DeploymentForm';
-import ErrorPanel from './ErrorPanel';
 
 import './style/CamundaModeler.css';
 import './style/comments.css';
@@ -38,13 +34,10 @@ const CamundaModeler = () => {
     const propertiesPanelRef = useRef(null);
     const fileInputRef = useRef(null);
     const [isOpen, setOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const [errorOccured, setErrorOccured] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
-        try {
+        if (!bpmnModelerRef.current) {
+
             bpmnModelerRef.current = new BpmnModeler({
                 container: '#bpmnview',
                 propertiesPanel: {
@@ -70,71 +63,46 @@ const CamundaModeler = () => {
                 }
             });
 
+            bpmnModelerRef.current.createDiagram();
             propertiesPanelRef.current = bpmnModelerRef.current.get('propertiesPanel');
-
-            return () => {
-                bpmnModelerRef.current.destroy();
-            };
-        } catch (error) {
-            handleError(error.message, true);
         }
-
     }, []);
 
-    const handleError = (msg, restart) => {
-        if (restart)
-            setOpen(false);
-        setErrorMsg(msg);
-        setErrorOccured(true);
-    };
-
     const handleCreateDiagram = () => {
-        try {
-            const bpmnModeler = bpmnModelerRef.current;
-            bpmnModeler.createDiagram((err, warnings) => {
-                if (err) {
-                    handleError('Failed to create BPMN diagram: ' + err.message, true);
-                } else {
-                    console.log('BPMN diagram created successfully');
-                }
-            });
-            setOpen(true);
-        } catch (error) {
-            handleError(error.message, true);
-        }
+        const bpmnModeler = bpmnModelerRef.current;
+        bpmnModeler.createDiagram((err, warnings) => {
+            if (err) {
+                console.log('Failed to create BPMN diagram: ' + err.message);
+            } else {
+                console.log('BPMN diagram created successfully');
+            }
+        });
+        setOpen(true);
     };
 
     const handleSaveDiagram = async () => {
         const bpmnModeler = bpmnModelerRef.current;
-        try {
-            const { xml } = await bpmnModeler.saveXML({ format: true }, function (err, xml) {
-            });
-            const json = xmlToJson(xml);
-            downloadJSON(JSON.stringify(json, null, 4));
-        } catch (error) {
-            handleError('Error converting BPMN diagram to JSON: ' + error.message);
-        }
+        const { xml } = await bpmnModeler.saveXML({ format: true }, function (err, xml) {
+        });
+        const json = xmlToJson(xml);
+        downloadJSON(JSON.stringify(json, null, 4));
     };
 
     const loadDiagram = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
         reader.onload = (e) => {
-            try {
-                const fileType = file.name.split('.').pop().toLowerCase();
-                let bpmnXML;
+            const fileType = file.name.split('.').pop().toLowerCase();
+            let bpmnXML;
 
-                if (fileType === 'bpmn') {
-                    bpmnXML = e.target.result;
-                } else if (fileType === 'json') {
-                    bpmnXML = jsonToXml(JSON.parse(e.target.result), true);
-                }
-                const modeler = bpmnModelerRef.current;
-                modeler.importXML(bpmnXML);
-                setOpen(true);
-            } catch (error) {
-                handleError('Error occured while loading BPMN diagram: ' + error.message);
+            if (fileType === 'bpmn') {
+                bpmnXML = e.target.result;
+            } else if (fileType === 'json') {
+                bpmnXML = jsonToXml(JSON.parse(e.target.result), true);
             }
+            const modeler = bpmnModelerRef.current;
+            modeler.importXML(bpmnXML);
+            setOpen(true);
         };
         if (file)
             reader.readAsText(file);
@@ -142,27 +110,6 @@ const CamundaModeler = () => {
 
     const handleLoadDiagram = async () => {
         fileInputRef.current.click();
-    };
-
-    const handleDeployDiagram = async (name, variables) => {
-        try {
-            const { xml } = await bpmnModelerRef.current.saveXML({ format: true }, function (err, xml) {
-            });
-            let bpmnXML = jsonToXml(xmlToJson(xml));
-
-            const client = new RestClient();
-            const res = await client.executeDiagram(name, variables, bpmnXML);
-
-            // fix conversion from engine to modeler
-            // if (res.data.message.source) {
-            //     bpmnXML = jsonToXml(xmlToJson(res.data.message.source), true);
-            //     bpmnModelerRef.current.importXML(bpmnXML);
-            // }
-
-            console.log(res);
-        } catch (error) {
-            handleError('Error occured while deploying diagram: ' + error.message);
-        }
     };
 
     return (
@@ -185,26 +132,19 @@ const CamundaModeler = () => {
                             <button className="action-button create-button" onClick={handleCreateDiagram}>Create</button>
                             <button className="action-button save-button" onClick={handleSaveDiagram}>Save</button>
                             <button className="action-button load-button" onClick={handleLoadDiagram}>Load</button>
-                            <button className="action-button deploy-button" onClick={() => setIsModalOpen(true)}>Deploy</button>
                         </div>
                     </div>
                 )
             }
             <div id="bpmnview" className={`editor ${isOpen ? 'open' : 'closed'}`}></div>
             <div id="propertiesview" className={`properties-panel ${isOpen ? 'open' : 'closed'}`}></div>
-            <input ref={fileInputRef} id="file-input" type="file" accept='.bpmn, .json' style={{ display: 'none' }} onChange={loadDiagram} />
-            <div>
-                <DeployDiagram
-                    isFormOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    onDeploy={handleDeployDiagram}
-                ></DeployDiagram>
-
-                {errorOccured && <ErrorPanel
-                    message={errorMsg}
-                    onClose={() => { setErrorOccured(false); setErrorMsg(""); }}>
-                </ErrorPanel>}
-            </div>
+            <input
+                ref={fileInputRef}
+                id="file-input"
+                type="file"
+                accept='.bpmn, .json'
+                style={{ display: 'none' }}
+                onChange={loadDiagram} />
         </div >
     );
 };
