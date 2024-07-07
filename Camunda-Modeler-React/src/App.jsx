@@ -1,12 +1,16 @@
-import React from 'react';
-
-import CamundaModeler from './components/CamundaModeler';
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import HomePage from "./Pages/HomePage";
 
 function App() {
+
+  const router = createBrowserRouter([
+    { path: '/modeler', element: <HomePage /> },
+
+    { path: '*', element: <Navigate to={"/modeler"} /> }
+  ]);
+
   return (
-    <div>
-      <CamundaModeler />
-    </div>
+    <RouterProvider router={router} />
   );
 }
 

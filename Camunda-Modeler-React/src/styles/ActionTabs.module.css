@@ -1,0 +1,40 @@
+.tabs {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    width: 100%;
+    gap: 10px;
+
+    background-color: #dedede;
+}
+
+.item-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: fit-content;
+
+    color: #e5e5e5;
+    cursor: pointer;
+}
+
+.tab-title {
+    /* File */
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 29px;
+    text-align: center;
+
+    color: #333333;
+    cursor: pointer;
+}

@@ -1,6 +1,8 @@
+
 export function xmlToJson(xmlString) {
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(xmlString, "text/xml");
+
     const filterEmptyTextNodes = (node) => {
         const childNodes = node.childNodes;
         for (let i = childNodes.length - 1; i >= 0; i--) {
@@ -53,7 +55,7 @@ export function xmlToJson(xmlString) {
     return { "bpmn:definitions": jsonResult };
 }
 
-export function jsonToXml(json, forModeler) {
+export function jsonToXml(json) {
     function convertNodeToXml(node, nodeName, depth) {
         let xml = '';
         const indent = '    '.repeat(depth);
@@ -67,20 +69,10 @@ export function jsonToXml(json, forModeler) {
 
             if (node["@attributes"]) {
                 for (const attrName in node["@attributes"]) {
-                    if (!(!forModeler && nodeName.includes("sequenceFlow") && attrName.includes("condition")))
-                        xml += ` ${attrName}="${node["@attributes"][attrName]}"`;
+                    xml += ` ${attrName}="${node["@attributes"][attrName]}"`;
                 }
             }
             xml += '>\n';
-
-            if (!forModeler && nodeName.includes("sequenceFlow")) {
-                const cond = node["@attributes"]["conditions:condition"];
-
-                if (cond) {
-                    let condition = "<bpmn:conditionExpression>" + cond + "</bpmn:conditionExpression>";
-                    xml += condition + "\n"
-                }
-            }
 
             for (const key in node) {
                 if (key === '@attributes') continue;
