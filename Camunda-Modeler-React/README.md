@@ -47,8 +47,6 @@ under src/components/style
     http://localhost:5173
     ```
 
-3. Follow the on-screen instructions to create, load, and save BPMN diagrams.
-
 ## Examples
 
 For examples and usage of bpmn-js, you can refer to the official bpmn-js examples repository:
