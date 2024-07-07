@@ -38,7 +38,7 @@ under src/components/style
 1. Start the development server:
 
     ```bash
-    npm start
+    npm run dev
     ```
 
 2. Open the application in your web browser:
