@@ -4,9 +4,9 @@ import HomePage from "./Pages/HomePage";
 function App() {
 
   const router = createBrowserRouter([
-    { path: '/modeler', element: <HomePage /> },
+    { path: '/', element: <HomePage /> },
 
-    { path: '*', element: <Navigate to={"/modeler"} /> }
+    { path: '*', element: <Navigate to={"/"} /> }
   ]);
 
   return (
