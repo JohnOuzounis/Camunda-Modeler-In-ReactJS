@@ -2,6 +2,14 @@
 
 This is a React web application for creating, editing, and visualizing BPMN diagrams using the Camunda Modeler.
 
+## Important Note 
+To integrate the properties panel properly create your react project using Vite with:
+
+```bash
+    npm create vite@latest
+ ```
+Then you will be able to add the camunda properties to the panel.
+
 ## Features
 
 - Create new BPMN diagrams
