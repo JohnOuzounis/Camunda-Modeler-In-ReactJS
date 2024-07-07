@@ -8,7 +8,9 @@ To integrate the properties panel properly create your react project using Vite 
 ```bash
     npm create vite@latest
  ```
-Then you will be able to add the camunda properties to the panel.
+
+Also to properly integrate the embedded-comments module you will need the comments.css file
+under src/components/style 
 
 ## Features
 
@@ -42,7 +44,7 @@ Then you will be able to add the camunda properties to the panel.
 2. Open the application in your web browser:
 
     ```
-    http://localhost:3000
+    http://localhost:5173
     ```
 
 3. Follow the on-screen instructions to create, load, and save BPMN diagrams.

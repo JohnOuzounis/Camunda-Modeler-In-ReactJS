@@ -12,7 +12,7 @@ import BpmnModeler from 'bpmn-js/lib/Modeler';
 import {
     BpmnPropertiesPanelModule,
     BpmnPropertiesProviderModule,
-    // CamundaPlatformPropertiesProviderModule
+    CamundaPlatformPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 import CamundaBpmnModdle from 'camunda-bpmn-moddle/resources/camunda.json';
 import EmbeddedComments from 'bpmn-js-embedded-comments';
@@ -48,7 +48,7 @@ const CamundaModeler = () => {
                     BpmnPropertiesProviderModule,
                     tagPropertiesProviderModule,
                     conditionPropertiesProviderModule,
-                    // CamundaPlatformPropertiesProviderModule,
+                    CamundaPlatformPropertiesProviderModule,
                     minimapModule,
                     EmbeddedComments,
                     ColorPickerModule

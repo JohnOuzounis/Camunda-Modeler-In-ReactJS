@@ -1,0 +1,34 @@
+{
+  "name": "camunda-modeler-react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@bpmn-io/properties-panel": "^3.22.0",
+    "bpmn-js": "^17.9.1",
+    "bpmn-js-color-picker": "^0.7.1",
+    "bpmn-js-embedded-comments": "^0.7.0",
+    "bpmn-js-properties-panel": "^5.18.0",
+    "camunda-bpmn-moddle": "^7.0.1",
+    "diagram-js-minimap": "^5.1.0",
+    "file-saver": "^2.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
+    "vite": "^5.3.1"
+  }
+}
