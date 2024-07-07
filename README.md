@@ -16,7 +16,6 @@ Then you will be able to add the camunda properties to the panel.
 - Load existing BPMN diagrams (both BPMN and JSON formats supported)
 - Save BPMN diagrams as JSON files
 - Visualize and edit BPMN diagrams using the Camunda Modeler
-- Run simple diagrams using bpmn-engine
 
 ## Installation
 
@@ -47,10 +46,6 @@ Then you will be able to add the camunda properties to the panel.
     ```
 
 3. Follow the on-screen instructions to create, load, and save BPMN diagrams.
-
-## Engine 
-To execute the diagrams install the backend server and start the bpmn engine.
-Refer to the [Engine](https://github.com/JohnOuzounis/engine) for more details.
 
 ## Examples
 
